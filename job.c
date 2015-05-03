@@ -452,7 +452,7 @@ int main()
 	/* 建立信号处理函数 */
 	newact.sa_sigaction=sig_handler;
 	sigemptyset(&newact.sa_mask);
-	newact.sa_flags=SA_SIGINFO;
+	newact.sa_flags=SA_SIGINFO;//此选项对信号处理程序提供了附加信息：一个指向siginfo结构的指针以及一个指向进程上下文标志符的之指针。
 	sigaction(SIGCHLD,&newact,&oldact1);
 	sigaction(SIGVTALRM,&newact,&oldact2);
 

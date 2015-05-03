@@ -17,6 +17,29 @@ int globalfd;
 
 struct waitqueue *head=NULL;
 struct waitqueue *next=NULL,*current =NULL;
+//IMPORT，打印等待队列进程信息专用，注意用啊，小伙伴们。
+void printWaitQueue()
+{
+	struct waitqueue *p;
+	char timebuf[BUFLEN];
+	/*
+	/* 打印信息头部 */
+	if(head!=NULL)
+	printf("JOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\tSTATE\n");
+
+	for(p=head;p!=NULL;p=p->next){
+		strcpy(timebuf,ctime(&(p->job->create_time)));
+		timebuf[strlen(timebuf)-1]='\0';
+		printf("%d\t%d\t%d\t%d\t%d\t%s\t%s\n",
+			p->job->jid,
+			p->job->pid,
+			p->job->ownerid,
+			p->job->run_time,
+			p->job->wait_time,
+			timebuf,
+			"READY");
+	}
+}
 
 /* 调度程序 */
 void scheduler()
@@ -37,9 +60,15 @@ void scheduler()
 		printf("no data read\n");
 #endif
 
+        //调试任务6
+        #ifdef DEBUG
+	printWaitQueue();
+	#endif
 	/* 更新等待队列中的作业 */
 	updateall();
-
+	#ifdef DEBUG
+	printWaitQueue();
+	#endif
 	switch(cmd.type){
 	case ENQ:
 		do_enq(newjob,cmd);

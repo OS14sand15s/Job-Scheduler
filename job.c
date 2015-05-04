@@ -10,6 +10,8 @@
 #include <time.h>
 #include "job.h"
 #define DEBUG
+
+
 int jobid=0;
 int siginfo=1;
 int fifo;
@@ -104,7 +106,7 @@ struct waitqueue* jobselect()
 {
 	struct waitqueue *p,*prev,*select,*selectprev;
 	int highest = -1;
-
+    char * timebuf=(char *)malloc(sizeof(char)*BUFLEN);
 	select = NULL;
 	selectprev = NULL;
 	if(head){
@@ -119,6 +121,26 @@ struct waitqueue* jobselect()
 			if (select == selectprev)
 				head = NULL;
 	}
+	#ifdef DEBUG
+	  printf("Task 8:The information of selceted job!\n");
+	  if(select!=NULL){
+	 	strcpy(timebuf,ctime(&(select->job->create_time)));
+		timebuf[strlen(timebuf)-1]='\0';
+		printf("JOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n");
+		printf("%d\t%d\t%d\t%d\t%d\t%s\t\n",
+			select->job->jid,
+			select->job->pid,
+			select->job->ownerid,
+			select->job->run_time,
+			select->job->wait_time,
+			timebuf
+			);
+	 }else{
+	 	printf("Task 8:selected job is null\n");
+
+	 }
+		
+	#endif
 	return select;
 }
 

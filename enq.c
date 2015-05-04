@@ -71,7 +71,7 @@ int main(int argc,char *argv[])
 			"enqcmd defpri\t%d\n"
 			"enqcmd data\t%s\n"
 			"enqcmd argnum\t%d\n",
-			enqcmd.type,enqcmd.owner,enqcmd.defpri,enqcmd.data,enqnum.argnum);
+			enqcmd.type,enqcmd.owner,enqcmd.defpri,enqcmd.data,enqcmd.argnum);
 
     #endif 
 

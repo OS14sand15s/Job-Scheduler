@@ -5,6 +5,7 @@
 #include <sys/ipc.h>
 #include <fcntl.h>
 #include "job.h"
+#define DEBUG
 
 /* 
  * 命令语法格式
@@ -31,6 +32,11 @@ int main(int argc,char *argv[])
 	statcmd.owner=getuid();
 	statcmd.argnum=0;
 
+	#ifdef DEBUG
+		printf("statcmd cmdtype \t%d\n"
+			"statcmd owner\t%d\n",
+			statcmd.type,statcmd.owner);
+	#endif
 	if((fd=open("/tmp/server",O_WRONLY))<0)
 		error_sys("stat open fifo failed");
 

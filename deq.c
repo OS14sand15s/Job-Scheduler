@@ -5,6 +5,7 @@
 #include <sys/ipc.h>
 #include <fcntl.h>
 #include "job.h"
+#define DEBUG
 
 /* 
  * 命令语法格式
@@ -34,6 +35,12 @@ int main(int argc,char *argv[])
 
 	strcpy(deqcmd.data,*++argv);
 	printf("jid %s\n",deqcmd.data);
+	
+	#ifdef DEBUG
+		printf("deqcmd cmdtype \t%d\n"
+			"deqcmd owner\t%d\n",
+			deqcmd.type,deqcmd.owner);
+	#endif
 
 	if((fd=open("/tmp/server",O_WRONLY))<0)
 		error_sys("deq open fifo failed");

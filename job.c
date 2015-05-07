@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include "job.h"
-
+#define DEBUG
 
 
 int jobid=0;
@@ -68,8 +68,16 @@ void scheduler()
 		do_deq(cmd);
 		break;
 	case STAT:
-
+		#ifdef DEBUG
+		        printf("Before cmd stat,the waiting queue information:\n");
+		        printWaitQueue();
+			printf("---------------------------------------------------------------------------------------------------------\n");
+		#endif
 		do_stat(cmd);
+		#ifdef DEBUG
+		        printf("Before cmd stat,the waiting queue information:\n");
+		        printWaitQueue();
+		#endif
 		break;
 	default:
 		break;

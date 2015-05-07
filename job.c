@@ -75,7 +75,8 @@ void scheduler()
 		#endif
 		do_stat(cmd);
 		#ifdef DEBUG
-		        printf("Before cmd stat,the waiting queue information:\n");
+		        printf("-------------------------------------------------------------------------------------------\n");
+		        printf("After cmd stat,the waiting queue information:\n");
 		        printWaitQueue();
 		#endif
 		break;

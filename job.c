@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include "job.h"
-#define DEBUG
+
 
 
 int jobid=0;
@@ -29,38 +29,22 @@ void scheduler()
 	bzero(&cmd,DATALEN);
 	if((count=read(fifo,&cmd,DATALEN))<0)
 		error_sys("read fifo failed");
-#ifdef DEBUG
-    printf("Task 3:Reading whether other process sends command!\n");
-	if(count){
-		printf("cmd cmdtype\t%d\ncmd defpri\t%d\ncmd data\t%s\n",cmd.type,cmd.defpri,cmd.data);
-	}
-	else
-		printf("no data read\n");
-#endif
 
-	/* 更新等待队列中的作业 */
-	#ifdef DEBUG
-	printf("Task 3:Update Jobs in wait queue!\n");
-	#endif
+
+
 	updateall();
 
 	switch(cmd.type){
 	case ENQ:
-		#ifdef DEBUG
-		printf("Task 3:Excute enq!\n");
-		#endif
+
 		do_enq(newjob,cmd);
 		break;
 	case DEQ:
-	#ifdef DEBUG
-		printf("Task 3:Excute deq!\n");
-		#endif
+
 		do_deq(cmd);
 		break;
 	case STAT:
-	#ifdef DEBUG
-		printf("Task 3:Excute stat!\n");
-		#endif
+
 		do_stat(cmd);
 		break;
 	default:
@@ -68,14 +52,13 @@ void scheduler()
 	}
 
 	/* 选择高优先级作业 */
-	#ifdef DEBUG
-		printf("Task 3:select which job to run next!\n");
-	#endif
+
 	next=jobselect();
+	if(next)
+	printf("%s\n",next->job->cmdarg[0]);
+else printf("NULL\n");
 	/* 作业切换 */
-	#ifdef DEBUG
-		printf("Task 3:Switch to the next job!\n");
-		#endif
+
 	jobswitch();
 }
 
@@ -121,26 +104,7 @@ struct waitqueue* jobselect()
 			if (select == selectprev)
 				head = NULL;
 	}
-	#ifdef DEBUG
-	  printf("Task 8:The information of selceted job!\n");
-	  if(select!=NULL){
-	 	strcpy(timebuf,ctime(&(select->job->create_time)));
-		timebuf[strlen(timebuf)-1]='\0';
-		printf("JOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n");
-		printf("%d\t%d\t%d\t%d\t%d\t%s\t\n",
-			select->job->jid,
-			select->job->pid,
-			select->job->ownerid,
-			select->job->run_time,
-			select->job->wait_time,
-			timebuf
-			);
-	 }else{
-	 	printf("Task 8:selected job is null\n");
 
-	 }
-		
-	#endif
 	return select;
 }
 
@@ -172,6 +136,9 @@ void jobswitch()
 		current = next;
 		next = NULL;
 		current->job->state = RUNNING;
+		
+		//usleep(2000);
+		waitpid(-1,NULL,WUNTRACED);
 		kill(current->job->pid,SIGCONT);
 		return;
 	}
@@ -194,6 +161,7 @@ void jobswitch()
 		next = NULL;
 		current->job->state = RUNNING;
 		current->job->wait_time = 0;
+
 		kill(current->job->pid,SIGCONT);
 		return;
 	}else{ /* next == NULL且current != NULL，不切换 */
@@ -265,13 +233,7 @@ void do_enq(struct jobinfo *newjob,struct jobcmd enqcmd)
 
 	arglist[i] = NULL;
 
-#ifdef DEBUG
 
-	printf("enqcmd argnum %d\n",enqcmd.argnum);
-	for(i = 0;i < enqcmd.argnum; i++)
-		printf("parse enqcmd:%s\n",arglist[i]);
-
-#endif
 
 	/*向等待队列中增加新的作业*/
 	newnode = (struct waitqueue*)malloc(sizeof(struct waitqueue));
@@ -292,13 +254,9 @@ void do_enq(struct jobinfo *newjob,struct jobcmd enqcmd)
 	if(pid==0){
 		newjob->pid =getpid();
 		/*阻塞子进程,等等执行*/
+		printf("raise stop\n");
 		raise(SIGSTOP);
-#ifdef DEBUG
 
-		printf("begin running\n");
-		for(i=0;arglist[i]!=NULL;i++)
-			printf("arglist %s\n",arglist[i]);
-#endif
 
 		/*复制文件描述符到标准输出*/
 		dup2(globalfd,1);

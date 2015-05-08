@@ -350,3 +350,217 @@ struct waitqueue* jobselect()
 	}
 	return select;
 }
+//------------------------------------------------------------------
+void jobswitch()
+{
+	//Note the changes of CURRENTQUEUE&SELECTQUEUE
+	struct waitqueue *p;
+	int i;
+//The current job has down.Then we can choose the next with a wonderful mood.
+	if(current && current->job->state == DONE){ /* 当前作业完成 */
+		/* 作业完成，删除它 */
+		for(i = 0;(current->job->cmdarg)[i] != NULL; i++){
+			free((current->job->cmdarg)[i]);
+			(current->job->cmdarg)[i] = NULL;
+		}
+		/* 释放空间 */
+		free(current->job->cmdarg);
+		free(current->job);
+		free(current);
+		RUN_TIME_COUNTER=0;
+		current = NULL;
+	}
+	if(next == NULL && current == NULL) /* 没有作业要运行 */
+
+		return;
+	else if (next != NULL && current == NULL){ /* 开始新的作业 */
+
+		printf("begin start new job\n");
+		current = next;
+		CURRENTQUEUE=SELECTQUEUE;
+		next = NULL;
+		current->job->state = RUNNING;
+		RUN_TIME_COUNTER=0;			//usleep(2000);
+		waitpid(-1,NULL,WUNTRACED);
+		kill(current->job->pid,SIGCONT);
+		return;
+	}
+	else if (next != NULL && current != NULL){ /* 切换作业 */
+	//   QIANG ZHAN//Sorry,I am poor in English.nextmei
+	//QIANGZHAN condition:
+	if(SELECTQUEUE==1&&next->job->run_time==0&&CURRENTQUEUE==2)//condition1;
+	{
+		printf("qiang zhan !!switch to Pid :%d\n",next->job->pid);
+		kill(current->job->pid,SIGSTOP);
+		//current->job>curpri do not change.
+		current->job->wait_time=0;
+		current->job->state=READY;
+		if(headq2)
+		{
+			for(p=headq2;p->next!=NULL;p=p->next);
+				p->next=current;
+		}
+		else
+		{
+			headq2=current;
+		}
+		current=next;
+		next=NULL;
+		CURRENTQUEUE=SELECTQUEUE;
+		current->job->state=RUNNING;
+		RUN_TIME_COUNTER=0;
+		current->job->wait_time=0;
+		current->next=NULL;//what a good habit!
+		kill(current->job->pid,SIGCONT);
+		return;
+	}
+	else if(SELECTQUEUE==1&&next->job->run_time==0&&CURRENTQUEUE==3)//QIANG ZHAN condition2;
+	{
+		printf("qiang zhan !!switch to Pid :%d\n",next->job->pid);
+		kill(current->job->pid,SIGSTOP);
+		//current->job>curpri do not change.
+		current->job->wait_time=0;
+		current->job->state=READY;
+		if(headq3)
+		{
+			for(p=headq3;p->next!=NULL;p=p->next);
+				p->next=current;
+		}
+		else
+		{
+			headq3=current;
+		}
+		current=next;
+		next=NULL;
+		CURRENTQUEUE=SELECTQUEUE;
+		current->job->state=RUNNING;
+		RUN_TIME_COUNTER=0;
+		current->job->wait_time=0;
+		current->next=NULL;//what a good habit!
+		kill(current->job->pid,SIGCONT);
+		return;
+	}
+	else if(CURRENTQUEUE==1){//DEGREED
+		printf("switch to Pid :%d\n",next->job->pid);
+		kill(current->job->pid,SIGSTOP);
+		//current->job>curpri do not change.
+		current->job->wait_time=0;
+		current->job->state=READY;
+		current->job->curpri=1;//reduce priority,
+		if(headq2)
+		{
+			for(p=headq2;p->next!=NULL;p=p->next);
+				p->next=current;
+		}
+		else
+		{
+			headq2=current;
+		}
+		current=next;
+		next=NULL;
+		CURRENTQUEUE=SELECTQUEUE;
+		current->job->state=RUNNING;
+		RUN_TIME_COUNTER=0;
+		current->job->wait_time=0;
+		current->next=NULL;//what a good habit!
+		kill(current->job->pid,SIGCONT);
+		return;
+	}
+	else if(CURRENTQUEUE==2)//continue;
+	{
+		if(RUN_TIME_COUNTER>=2)//time pies are eated out...
+		{
+		printf("switch to Pid :%d\n",next->job->pid);
+		kill(current->job->pid,SIGSTOP);
+		//current->job>curpri do not change.
+		current->job->wait_time=0;
+		current->job->state=READY;
+		current->job->curpri=0;//reduce priority,
+		if(headq3)
+		{
+			for(p=headq3;p->next!=NULL;p=p->next);
+				p->next=current;
+		}
+		else
+		{
+			headq3=current;
+		}
+		current=next;
+		next=NULL;
+		CURRENTQUEUE=SELECTQUEUE;
+		current->job->state=RUNNING;
+		RUN_TIME_COUNTER=0;
+		current->job->wait_time=0;
+		current->next=NULL;//what a good habit!
+		kill(current->job->pid,SIGCONT);	
+		}
+		else{//continue,put the next into the origin queue
+			if(SELECTQUEUE==1){
+				next->next=headq1;
+				headq1=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==2){
+				next->next=headq2;
+				headq2=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==3){
+				next->next=headq3;
+				headq3=next;
+				next=NULL;
+			}
+		}
+		return;
+	}
+	else if(CURRENTQUEUE==3)//continue;
+	{
+		if(RUN_TIME_COUNTER>=5)//time pies are eated out...
+		{
+		printf("switch to Pid :%d\n",next->job->pid);
+		kill(current->job->pid,SIGSTOP);
+		//current->job>curpri do not change.
+		current->job->wait_time=0;
+		current->job->state=READY;
+		current->job->curpri=0;//reduce priority,
+		if(headq3)
+		{
+			for(p=headq3;p->next!=NULL;p=p->next);
+				p->next=current;
+		}
+		else
+		{
+			headq3=current;
+		}
+		current=next;
+		next=NULL;
+		CURRENTQUEUE=SELECTQUEUE;
+		current->job->state=RUNNING;
+		RUN_TIME_COUNTER=0;
+		current->job->wait_time=0;
+		current->next=NULL;//what a good habit!
+		kill(current->job->pid,SIGCONT);	
+		}
+		else{//continue,put the next into the origin queue
+			if(SELECTQUEUE==1){
+				next->next=headq1;
+				headq1=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==2){
+				next->next=headq2;
+				headq2=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==3){
+				next->next=headq3;
+				headq3=next;
+				next=NULL;
+			}
+		}
+		return;
+	}
+	}else{ /* next == NULL且current != NULL，不切换 */
+		return;
+	}
+}

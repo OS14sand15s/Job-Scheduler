@@ -332,7 +332,7 @@ struct waitqueue* jobselect()
 		select=headq1;
 		headq1=headq1->next;
 		select->next=NULL;
-	}else if(headq2=NULL){
+	}else if(headq2!=NULL){
 		SELECTQUEUE=2;
 		select=headq2;
 		headq2=headq2->next;

@@ -17,7 +17,7 @@ int siginfo=1;
 int fifo;
 int globalfd;
 
-struct waitqueue *head=NULL;
+struct waitqueue *head=NULL,*headq1=NULL,*headq2=NULL,*headq3=NULL;//q1 has the highest priority!You can delete ptr head.
 struct waitqueue *next=NULL,*current =NULL;
 
 /*Writen by WXY*/

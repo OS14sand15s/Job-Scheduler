@@ -223,3 +223,101 @@ void do_stat(struct jobcmd statcmd)
 			"READY","q3");
 	}
 }
+//----------------------------------------------UPDATEALL
+void updateall()
+{
+	struct waitqueue *p,*p1,*p2,*p3,*pre;
+	/* 更新作业运行时间 */
+	if(current!=NULL)
+		current->job->run_time += 1; /* 加1代表1000ms */
+	/* 更新作业等待时间及优先级 */
+	for(p=headq1;p!=NULL;p=p->next){//priority=2
+		p->job->wait_time+=1000;
+	}
+	for(p=headq2,pre=headq2;p!=NULL;){//priority=1
+		p->job->wait_time+=1000;
+		if(p->job->wait_time>=10000){
+			p->job->curpri=2;
+			p->job->wait_time=0;
+			if(p==headq2){
+				headq2=headq2->next;
+				p->next=NULL;
+				//Find the p1
+				if(headq1==NULL){
+					headq1=p;
+				}
+				else
+				{
+					for(p1=headq1;p1->next!=NULL;p1=p1->next);
+						p1->next=p;
+				}
+				p=head2;
+				pre=head2;//A new beginning;
+			}
+			else{
+				p2=p;
+				pre->next=p->next;
+				p2->next=NULL;
+				if(headq1==NULL){
+					headq1=p2;
+				}else
+				{
+					for(p1=headq1;p1->next!=NULL;p1=p1->next);
+						p1->next=p2;
+				}
+				p=p->next;//pre do not be changed;
+			}
+		}
+		else{
+			pre=p;
+			p=p->next;
+		}
+	}
+	for(p=headq3,pre=headq3;p!=NULL;)
+	{//priority=0;
+		p->job->wait_time+=1000;
+		if(p-job->wait_time>=10000)
+		{
+			p->job->curpri=1;
+			p->job->wait_time=0;
+			if(headq3==p)
+			{
+				headq3=headq3->next;
+				p->next=NULL;
+				//Find the end of q2;
+				if(headq2==NULL)
+				{
+					headq2=p;
+				}
+				else
+				{
+					for(p2=headq2;p2->next!=NULL;p2=p2->next);
+						p2->next=p;
+				}
+				p=headq3;
+				pre=headq3;
+			}
+			else
+			{
+			p3=p;
+			pre->next=p->next;
+			p3->next=NULL;
+			if(headq2==NULL)
+			{
+				headq2=p3;
+			}
+			else
+			{
+				for(p2=headq2;p2->next!=NULL;p2=p2->next);
+					p2->next=p3;
+			}
+			p=pre->next;
+		}
+	}
+	else{
+		pre=p;
+		p=p->next;
+	}
+}
+
+}

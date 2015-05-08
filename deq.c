@@ -37,7 +37,8 @@ int main(int argc,char *argv[])
 	printf("jid %s\n",deqcmd.data);
 	
 	#ifdef DEBUG
-		printf("deqcmd cmdtype \t%d\n"
+		printf("Task 5:\n"
+			"deqcmd cmdtype \t%d(-1 means ENQ,-2 means DEQ,-3 means STAT)\n"
 			"deqcmd owner\t%d\n",
 			deqcmd.type,deqcmd.owner);
 	#endif

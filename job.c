@@ -17,6 +17,7 @@ int siginfo=1;
 int fifo;
 int globalfd;
 
+int CURRENTQUEUE=1,SELECTQUEUE=1,RUN_TIME_COUNTER=0;//global variable.
 struct waitqueue *head=NULL,*headq1=NULL,*headq2=NULL,*headq3=NULL;//q1 has the highest priority!You can delete ptr head.
 struct waitqueue *next=NULL,*current =NULL;
 

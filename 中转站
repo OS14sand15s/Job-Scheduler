@@ -228,8 +228,10 @@ void updateall()
 {
 	struct waitqueue *p,*p1,*p2,*p3,*pre;
 	/* 更新作业运行时间 */
-	if(current!=NULL)
+	if(current!=NULL){
 		current->job->run_time += 1; /* 加1代表1000ms */
+		RUN_TIME_COUNTER++;
+	}
 	/* 更新作业等待时间及优先级 */
 	for(p=headq1;p!=NULL;p=p->next){//priority=2
 		p->job->wait_time+=1000;

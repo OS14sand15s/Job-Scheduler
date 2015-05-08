@@ -1,9 +1,7 @@
 # Job-Scheduler
-OS work 2
-直接改文件就行了。我无力得说。
 
-我是大脑残
-好吧 重说一下Orz
-1，6崔崔 2，7小燕燕，3，8天宇大大
-4，5，9，10蠢木木
-就酱
+OS第二个实验
+
+实验组：张天宇（FlyHighest），王晓燕（ wangxiaoyaner ），崔珊博（summernsd），牟许东（AlsikeE）。
+
+主要负责人：牟许东

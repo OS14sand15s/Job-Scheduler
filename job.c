@@ -169,7 +169,7 @@ void jobswitch()
 		current = next;
 		next = NULL;
 		current->job->state = RUNNING;
-		
+		current->next=NULL;//这里很重要，因为他的next可能不是NULL，会造成四循环
 		//usleep(2000);
 		waitpid(-1,NULL,WUNTRACED);
 		kill(current->job->pid,SIGCONT);
@@ -182,7 +182,7 @@ void jobswitch()
 		current->job->curpri = current->job->defpri;
 		current->job->wait_time = 0;
 		current->job->state = READY;
-
+		current->next=NULL;
 		/* 放回等待队列 */
 		if(head){
 			for(p = head; p->next != NULL; p = p->next);
@@ -191,6 +191,7 @@ void jobswitch()
 			head = current;
 		}
 		current = next;
+		current->next=NULL;
 		next = NULL;
 		current->job->state = RUNNING;
 		current->job->wait_time = 0;

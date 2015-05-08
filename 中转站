@@ -1,0 +1,159 @@
+void do_enq(struct jobinfo *newjob,struct jobcmd enqcmd)
+{
+	struct waitqueue *newnode,*p;
+	int i=0,pid;
+	char *offset,*argvec,*q;
+	char **arglist;
+	sigset_t zeromask;
+
+	sigemptyset(&zeromask);
+
+	/* 封装jobinfo数据结构 */
+	newjob = (struct jobinfo *)malloc(sizeof(struct jobinfo));
+	newjob->jid = allocjid();
+	newjob->defpri = enqcmd.defpri;
+	newjob->curpri = enqcmd.defpri;
+	newjob->ownerid = enqcmd.owner;
+	newjob->state = READY;
+	newjob->create_time = time(NULL);
+	newjob->wait_time = 0;
+	newjob->run_time = 0;
+	arglist = (char**)malloc(sizeof(char*)*(enqcmd.argnum+1));
+	newjob->cmdarg = arglist;
+	offset = enqcmd.data;
+	argvec = enqcmd.data;
+	while (i < enqcmd.argnum){
+		if(*offset == ':'){
+			*offset++ = '\0';
+			q = (char*)malloc(offset - argvec);
+			strcpy(q,argvec);
+			arglist[i++] = q;
+			argvec = offset;
+		}else
+			offset++;
+	}
+
+	arglist[i] = NULL;
+
+
+
+	/*向等待队列中增加新的作业*/
+	newnode = (struct waitqueue*)malloc(sizeof(struct waitqueue));
+	newnode->next =NULL;
+	newnode->job=newjob;
+
+	if(headq1)//New comer should be added in headq1.
+	{
+		for(p=headq1;p->next != NULL; p=p->next);
+		p->next =newnode;
+	}else
+		headq1=newnode;
+
+	/*为作业创建进程*/
+	if((pid=fork())<0)
+		error_sys("enq fork failed");
+
+	if(pid==0){
+		newjob->pid =getpid();
+		/*阻塞子进程,等等执行*/
+		printf("raise stop\n");
+		raise(SIGSTOP);
+
+
+		/*复制文件描述符到标准输出*/
+		dup2(globalfd,1);
+		/* 执行命令 */
+		if(execv(arglist[0],arglist)<0)
+			printf("exec failed\n");
+		exit(1);
+	}else{
+		newjob->pid=pid;
+	}
+}
+//-------------------------------------------------------------
+void do_deq(struct jobcmd deqcmd)
+{
+	int deqid,i;
+	struct waitqueue *p,*prev,*select,*selectprev;
+	deqid=atoi(deqcmd.data);
+
+#ifdef DEBUG
+	printf("deq jid %d\n",deqid);
+#endif
+
+	/*current jodid==deqid,终止当前作业*/
+	if (current && current->job->jid ==deqid){
+		printf("teminate current job\n");
+		kill(current->job->pid,SIGKILL);
+		for(i=0;(current->job->cmdarg)[i]!=NULL;i++){
+			free((current->job->cmdarg)[i]);
+			(current->job->cmdarg)[i]=NULL;
+		}
+		free(current->job->cmdarg);
+		free(current->job);
+		free(current);
+		current=NULL;
+	}
+	else{ /* 或者在等待队列中查找deqid */
+		select=NULL;
+		selectprev=NULL;
+		if(headq1){
+			for(prev=headq1,p=headq1;p!=NULL;prev=p,p=p->next)
+				if(p->job->jid==deqid){
+					select=p;
+					selectprev=prev;
+					break;
+				}
+				if(select!=NULL&&select==headq1)//headq1 is the target;
+				{
+					headq1=headq1->next;
+					select->next=NULL;//This is a good habit;
+				}
+				else if(select!=NULL){
+					selectprev->next=select->next;
+					select->next=NULL;
+				}
+		}
+		if(select==NULL&&headq2){
+			for(prev=headq2,p=headq2;p!=NULL;prev=p,p=p->next)
+				if(p->job->jid==deqid){
+					select=p;
+					selectprev=prev;
+					break;
+				}
+				if(select!=NULL&&select==headq2)
+				{
+					headq2=headq2->next;
+					select->next=NULL;
+				}else if(select!=NULL){
+					selectprev->next=select->next;
+					select->next=NULL;
+				}
+		}
+		if(select==NULL&&headq3){
+			for(prev=headq3,p=headq3;p!=NULL;prev=p,p=p->next)
+				if(p->job->jid==deqid){
+					select=p;
+					selectprev=prev;
+					break;
+				}
+				if(select!=NULL&&select==headq3){
+					headq3=headq3->next;
+					select->next=NULL;
+				}else if(select!=NULL){
+					selectprev->next=select->next;
+					select->next=NULL;
+				}
+		}
+		if(select){
+			for(i=0;(select->job->cmdarg)[i]!=NULL;i++){
+				free((select->job->cmdarg)[i]);
+				(select->job->cmdarg)[i]=NULL;
+			}
+			free(select->job->cmdarg);
+			free(select->job);
+			free(select);
+			select=NULL;
+		}
+	}
+}

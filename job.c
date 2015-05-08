@@ -194,7 +194,7 @@ void jobswitch()
 		next = NULL;
 		current->job->state = RUNNING;
 		current->job->wait_time = 0;
-	        waitpid(-1,NULL,WUNTRACED);
+	       // waitpid(-1,NULL,WUNTRACED);
 		kill(current->job->pid,SIGCONT);
 		return;
 	}else{ /* next == NULL且current != NULL，不切换 */

@@ -21,28 +21,6 @@ int CURRENTQUEUE=1,SELECTQUEUE=1,RUN_TIME_COUNTER=0;//global variable.
 struct waitqueue *head=NULL,*headq1=NULL,*headq2=NULL,*headq3=NULL;//q1 has the highest priority!You can delete ptr head.
 struct waitqueue *next=NULL,*current =NULL;
 
-/*Writen by WXY*/
-void printWaitQueue() 
- { 
-	struct waitqueue *p; 
-	char timebuf[BUFLEN]; 
-        /*printing the head*/
-	if(head!=NULL) 
-	printf("JOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\tSTATE\n"); 
-
-	for(p=head;p!=NULL;p=p->next){ 
-		strcpy(timebuf,ctime(&(p->job->create_time))); 
-		timebuf[strlen(timebuf)-1]='\0'; 
- 		printf("%d\t%d\t%d\t%d\t%d\t%s\t%s\n", 
-			p->job->jid, 
-			p->job->pid, 
-			p->job->ownerid, 
-			p->job->run_time, 
-			p->job->wait_time, 
-			timebuf, 
-			"READY"); 
- 	} 
-} 
 
 /* µ÷¶È³ÌÐò */
 void scheduler()
@@ -64,7 +42,6 @@ void scheduler()
 	/* žüÐÂµÈŽý¶ÓÁÐÖÐµÄ×÷Òµ */
 	#ifdef DEBUG
         printf("Task 6: Before Updateall\n");
-        printWaitQueue();
 	#endif
 	#ifdef DEBUG
         printf("Task 3:Update jobs in wait queue!\n");
@@ -72,7 +49,6 @@ void scheduler()
 	updateall();
 	#ifdef DEBUG
         printf("Task 6: After Updateall\n");
-        printWaitQueue();
 	#endif
 	switch(cmd.type){
 	case ENQ:
@@ -81,12 +57,10 @@ void scheduler()
                 #endif
                     #ifdef DEBUG
                     printf("Task 7:Before ENQ\n");
-	             printWaitQueue();
                     #endif
 		do_enq(newjob,cmd);
 	              #ifdef DEBUG
                     printf("Task 7:After ENQ\n");
-                    printWaitQueue();
                     #endif
 		break;
 	case DEQ:
@@ -95,12 +69,10 @@ void scheduler()
                 #endif
                     #ifdef DEBUG
                     printf("Task 7:Before DEQ\n");
-                    printWaitQueue();
                     #endif
 		do_deq(cmd);
                     #ifdef DEBUG
                     printf("Task 7:After DEQ\n");
-                    printWaitQueue();
                     #endif
 		break;
 	case STAT:
@@ -109,12 +81,10 @@ void scheduler()
                 #endif
                     #ifdef DEBUG
                     printf("Task 7:Before STAT\n");
-                    printWaitQueue();
                     #endif
 		do_stat(cmd);
                     #ifdef DEBUG
                     printf("Task 7:After STAT\n");
-                    printWaitQueue();
                     #endif
 		break;
 	default:
@@ -125,70 +95,13 @@ void scheduler()
         #endif
 	/* Ñ¡ÔñžßÓÅÏÈŒ¶×÷Òµ */
 	next=jobselect();
-	#ifdef DEBUG
-        if(next!=NULL){
-	char timebuf[BUFLEN];
-        printf("Task 8:\nThe job selected:\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
-	strcpy(timebuf,ctime(&(next->job->create_time))); 
-	timebuf[strlen(timebuf)-1]='\0'; 
- 	printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
-		next->job->jid, 
-		next->job->pid, 
-		next->job->ownerid, 
-		next->job->run_time, 
-		next->job->wait_time, 
-		timebuf); 
-        }
-        else
-        	printf("Task 8:No job selected!\n"); 
-       #endif
         #ifdef DEBUG
         printf("Task 3:Switch to the next!\n");
         #endif
 	/* ×÷ÒµÇÐ»» */
-        #ifdef DEBUG
-        char timebuf[BUFLEN];
-        if(current != NULL){
-        printf("Task 9:\nThe current job(before switch):\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
-	strcpy(timebuf,ctime(&(current->job->create_time))); 
-	timebuf[strlen(timebuf)-1]='\0'; 
- 	printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
-		current->job->jid, 
-		current->job->pid, 
-		current->job->ownerid, 
-		current->job->run_time, 
-		current->job->wait_time, 
-		timebuf);
-        printf("Task 9:\nThe information of the queue(before switch):\n");
-	printWaitQueue();
-        }
-        else {
-		printf("Task 9:No current job!\n");
-                printWaitQueue();
-        }
-        #endif
+      
 	jobswitch();
-        #ifdef DEBUG
-       // char timebuf[BUFLEN];
-        if(current != NULL){
-        printf("Task 9:\nThe current job(after switch):\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
-	strcpy(timebuf,ctime(&(current->job->create_time))); 
-	timebuf[strlen(timebuf)-1]='\0'; 
- 	printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
-		current->job->jid, 
-		current->job->pid, 
-		current->job->ownerid, 
-		current->job->run_time, 
-		current->job->wait_time, 
-		timebuf);
-        printf("Task 9:\nThe information of the queue(after switch):\n");
-        printWaitQueue();
-        }
-        else {
-       	printf("Task 9:No current job after switch!\n");
-		printWaitQueue();
-        }
-       #endif
+       
 }
 int allocjid()
 {

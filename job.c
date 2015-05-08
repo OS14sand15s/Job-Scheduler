@@ -124,6 +124,23 @@ void scheduler()
         #endif
 	/* Ñ¡ÔñžßÓÅÏÈŒ¶×÷Òµ */
 	next=jobselect();
+	#ifdef DEBUG
+        if(next!=NULL){
+	char timebuf[BUFLEN];
+        printf("Task 8:\nThe job selected:\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
+	strcpy(timebuf,ctime(&(next->job->create_time))); 
+	timebuf[strlen(timebuf)-1]='\0'; 
+ 	printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
+		next->job->jid, 
+		next->job->pid, 
+		next->job->ownerid, 
+		next->job->run_time, 
+		next->job->wait_time, 
+		timebuf); 
+        }
+        else
+        	printf("Task 8:No job selected!\n"); 
+       #endif
         #ifdef DEBUG
         printf("Task 3:Switch to the next!\n");
         #endif
@@ -209,23 +226,6 @@ struct waitqueue* jobselect()
 			if (select == selectprev)
 				head = NULL;
 	}
-       #ifdef DEBUG
-        if(select!=NULL){
-	char timebuf[BUFLEN];
-        printf("Task 8:\nThe job selected:\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
-	strcpy(timebuf,ctime(&(select->job->create_time))); 
-	timebuf[strlen(timebuf)-1]='\0'; 
- 	printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
-		select->job->jid, 
-		select->job->pid, 
-		select->job->ownerid, 
-		select->job->run_time, 
-		select->job->wait_time, 
-		timebuf); 
-        }
-        else
-        	printf("Task 8:No job selected!\n"); 
-       #endif
 	return select;
 }
 void jobswitch() 

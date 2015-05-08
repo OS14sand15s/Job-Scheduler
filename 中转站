@@ -321,3 +321,30 @@ void updateall()
 }
 
 }
+//--------------------------------------
+struct waitqueue* jobselect()
+{
+	struct waitqueue *select;
+	select = NULL;
+	//For every queue,the mode is First Come,First Service.
+	if(headq1!=NULL){
+		SELECTQUEUE=1;
+		select=headq1;
+		headq1=headq1->next;
+		select->next=NULL;
+	}else if(headq2=NULL){
+		SELECTQUEUE=2;
+		select=headq2;
+		headq2=headq2->next;
+		select->next=NULL//What a good habit!
+	}else if(head3!=NULL){
+		SELECTQUEUE=3;
+		select=headq3;
+		headq3=headq3->next;
+		select->next=NULL;
+	}else{
+		SELECTQUEUE=0;
+		select=NULL;
+	}
+	return select;
+}

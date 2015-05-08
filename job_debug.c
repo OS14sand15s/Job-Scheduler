@@ -302,6 +302,21 @@ void sig_handler(int sig,siginfo_t *info,void *notused)
     return;
 
 case SIGCHLD: /* ×Óœø³ÌœáÊøÊ±Ž«ËÍžøžžœø³ÌµÄÐÅºÅ */
+	#ifdef DEBUG
+	char timebuf[BUFLEN];
+        printf("Task 10:\nThe current job:\nJOBID\tPID\tOWNER\tRUNTIME\tWAITTIME\tCREATTIME\t\n"); 
+        strcpy(timebuf,ctime(&(current->job->create_time))); 
+        timebuf[strlen(timebuf)-1]='\0'; 
+        printf("%d\t%d\t%d\t%d\t%d\t%s\n", 
+                current->job->jid, 
+                current->job->pid, 
+                current->job->ownerid, 
+		current->job->run_time, 
+		current->job->wait_time, 
+		timebuf);
+        printf("Task 10:\nThe information of the queue:\n");
+        printWaitQueue();
+        #endif
 	ret = waitpid(-1,&status,WNOHANG);
 	if (ret == 0)
 		return;

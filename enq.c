@@ -66,7 +66,8 @@ int main(int argc,char *argv[])
 	}
 
     #ifdef DEBUG
-		printf("enqcmd cmdtype \t%d\n"
+		printf("Task 4:\n"
+			"enqcmd cmdtype \t%d(-1 means ENQ,-2 means DEQ,-3 means STAT)\n"
 			"enqcmd owner\t%d\n"
 			"enqcmd defpri\t%d\n"
 			"enqcmd data\t%s\n"

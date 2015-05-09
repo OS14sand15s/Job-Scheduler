@@ -228,7 +228,7 @@ void jobswitch()
 	else if (next != NULL && current != NULL){ /* 切换作业 */
 	//   QIANG ZHAN//Sorry,I am poor in English.nextmei
 	//QIANGZHAN condition:
-	if(SELECTQUEUE==1&&next->job->run_time==0&&CURRENTQUEUE==2)//condition1;
+	if(SELECTQUEUE<=CURRENTQUEUE&&next->job->run_time==0&&CURRENTQUEUE==2)//condition1;
 	{
 		printf("qiang zhan !!switch to Pid :%d\n",next->job->pid);
 		kill(current->job->pid,SIGSTOP);
@@ -254,7 +254,7 @@ void jobswitch()
 		kill(current->job->pid,SIGCONT);
 		return;
 	}
-	else if(SELECTQUEUE==1&&next->job->run_time==0&&CURRENTQUEUE==3)//QIANG ZHAN condition2;
+	else if(SELECTQUEUE<=3&&next->job->run_time==0&&CURRENTQUEUE==3)//QIANG ZHAN condition2;
 	{
 		printf("qiang zhan !!switch to Pid :%d\n",next->job->pid);
 		kill(current->job->pid,SIGSTOP);
@@ -405,6 +405,7 @@ void jobswitch()
 	}
 }
 
+
 void sig_handler(int sig,siginfo_t *info,void *notused)
 {
 	int status;
@@ -477,13 +478,31 @@ void do_enq(struct jobinfo *newjob,struct jobcmd enqcmd)
 	newnode = (struct waitqueue*)malloc(sizeof(struct waitqueue));
 	newnode->next =NULL;
 	newnode->job=newjob;
+	if(newjob->defpri==0){
+			if(headq3)//New comer should be added in headq1.
+	 			{
+					for(p=headq3;p->next != NULL; p=p->next);
+					p->next =newnode;
+				}else
+					headq3=newnode;
 
-	if(headq1)//New comer should be added in headq1.
-	{
-		for(p=headq1;p->next != NULL; p=p->next);
-		p->next =newnode;
-	}else
-		headq1=newnode;
+	}
+	else if(newjob->defpri==1){
+			if(headq2)//New comer should be added in headq1.
+	 			{
+					for(p=headq2;p->next != NULL; p=p->next);
+					p->next =newnode;
+				}else
+					headq2=newnode;
+
+	}else if(newjob->defpri==2){
+			if(headq1)//New comer should be added in headq1.
+	 		   	{
+					for(p=headq1;p->next != NULL; p=p->next);
+					p->next =newnode;
+				}else
+					headq1=newnode;
+	}
 
 	/*为作业创建进程*/
 	if((pid=fork())<0)

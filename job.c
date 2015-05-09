@@ -218,11 +218,12 @@ void jobswitch()
 		printf("begin start new job\n");
 		current = next;
 		CURRENTQUEUE=SELECTQUEUE;
-		next = NULL;
+	
 		current->job->state = RUNNING;
 		RUN_TIME_COUNTER=0;			//usleep(2000);
-		waitpid(-1,NULL,WUNTRACED);
+	//	waitpid(-1,NULL,WUNTRACED);
 		kill(current->job->pid,SIGCONT);
+			next = NULL;
 		return;
 	}
 	else if (next != NULL && current != NULL){ /* 切换作业 */
@@ -245,13 +246,14 @@ void jobswitch()
 			headq2=current;
 		}
 		current=next;
-		next=NULL;
+	//	next=NULL;
 		CURRENTQUEUE=SELECTQUEUE;
 		current->job->state=RUNNING;
 		RUN_TIME_COUNTER=0;
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);
+		next = NULL;
 		return;
 	}
 	else if(SELECTQUEUE<=3&&next->job->run_time==0&&CURRENTQUEUE==3)//QIANG ZHAN condition2;
@@ -271,13 +273,14 @@ void jobswitch()
 			headq3=current;
 		}
 		current=next;
-		next=NULL;
+//next=NULL;
 		CURRENTQUEUE=SELECTQUEUE;
 		current->job->state=RUNNING;
 		RUN_TIME_COUNTER=0;
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);
+		next = NULL;
 		return;
 	}
 	else if(CURRENTQUEUE==1){//DEGREED
@@ -297,13 +300,14 @@ void jobswitch()
 			headq2=current;
 		}
 		current=next;
-		next=NULL;
+	//	next=NULL;
 		CURRENTQUEUE=SELECTQUEUE;
 		current->job->state=RUNNING;
 		RUN_TIME_COUNTER=0;
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);
+		next = NULL;
 		return;
 	}
 	else if(CURRENTQUEUE==2)//continue;
@@ -326,13 +330,15 @@ void jobswitch()
 			headq3=current;
 		}
 		current=next;
-		next=NULL;
+//		next=NULL;
 		CURRENTQUEUE=SELECTQUEUE;
 		current->job->state=RUNNING;
 		RUN_TIME_COUNTER=0;
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);	
+			next = NULL;
+			
 		}
 		else{//continue,put the next into the origin queue
 			if(SELECTQUEUE==1){
@@ -373,13 +379,14 @@ void jobswitch()
 			headq3=current;
 		}
 		current=next;
-		next=NULL;
+	//	next=NULL;
 		CURRENTQUEUE=SELECTQUEUE;
 		current->job->state=RUNNING;
 		RUN_TIME_COUNTER=0;
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);	
+		next = NULL;
 		}
 		else{//continue,put the next into the origin queue
 			if(SELECTQUEUE==1){
@@ -523,6 +530,7 @@ void do_enq(struct jobinfo *newjob,struct jobcmd enqcmd)
 		exit(1);
 	}else{
 		newjob->pid=pid;
+		wait(NULL);
 	}
 }
 

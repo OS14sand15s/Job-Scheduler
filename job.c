@@ -20,6 +20,25 @@ int CURRENTQUEUE=1,SELECTQUEUE=1,RUN_TIME_COUNTER=0;//global variable.
 struct waitqueue *headq1=NULL,*headq2=NULL,*headq3=NULL;
 struct waitqueue *next=NULL,*current =NULL;
 /* 调度程序 */
+void putBack()
+{
+			if(SELECTQUEUE==1){
+				next->next=headq1;
+				headq1=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==2){
+				next->next=headq2;
+				headq2=next;
+				next=NULL;
+			}
+			else if(SELECTQUEUE==3){
+				next->next=headq3;
+				headq3=next;
+				next=NULL;
+			}
+			
+}
 void scheduler()
 {
 	struct jobinfo *newjob=NULL;
@@ -284,12 +303,23 @@ void jobswitch()
 		return;
 	}
 	else if(CURRENTQUEUE==1){//DEGREED
-		printf("switch to Pid :%d\n",next->job->pid);
+	
 		kill(current->job->pid,SIGSTOP);
 		//current->job>curpri do not change.
 		current->job->wait_time=0;
 		current->job->state=READY;
 		current->job->curpri=1;//reduce priority,
+		if(current->job->curpri>next->job->curpri){
+		//	printf("COME INININI\n");
+			putBack();
+			current->job->wait_time=0;
+			current->job->state=RUNNING;
+			RUN_TIME_COUNTER=0;
+			CURRENTQUEUE=2;
+			kill(current->job->pid,SIGCONT);
+
+		}
+		else{
 		if(headq2)
 		{
 			for(p=headq2;p->next!=NULL;p=p->next);
@@ -307,7 +337,8 @@ void jobswitch()
 		current->job->wait_time=0;
 		current->next=NULL;//what a good habit!
 		kill(current->job->pid,SIGCONT);
-		next = NULL;
+		next = NULL;}
+			printf("switch to Pid :%d\n",current->job->pid);
 		return;
 	}
 	else if(CURRENTQUEUE==2)//continue;
